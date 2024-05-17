@@ -1,0 +1,2 @@
+cd\python\FretesGoogleDrive\
+python Importa_Planilhas_Logistica_Onedrive.py

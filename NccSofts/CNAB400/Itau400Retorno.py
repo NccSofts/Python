@@ -1,10 +1,10 @@
-import pyodbc #sql
 import os 
+import pyodbc #sql
 import glob #diretorios e arquivos
 import shutil #diretorios e arquivos
 import pandas as pd
 from datetime import datetime #tratamento de data e hora
-
+import parametros
 
 server = '52.67.126.131' 
 database = 'PJKTB2' 
@@ -12,6 +12,48 @@ username = 'devops'
 password = 'pe7IhicAYlW&_igi?aC7' 
 cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
 cursor = cnxn.cursor()
+
+
+
+from ftplib import FTP
+
+# Conectar ao servidor FTP
+ftp = FTP('ftp.example.com')
+ftp.login(user='username', passwd='password')
+
+# Listar arquivos no diretório atual
+files = ftp.nlst()
+print('Arquivos no diretório:', files)
+
+# Diretório de destino no servidor FTP para onde os arquivos serão movidos
+dest_dir = 'processed'  # Substitua pelo caminho do diretório de destino
+
+# Certifique-se de que o diretório de destino existe, caso contrário, crie-o
+if dest_dir not in ftp.nlst():
+    ftp.mkd(dest_dir)
+
+# Processar cada arquivo
+for filename in files:
+    local_filename = f'local_{filename}'  # Nome do arquivo local temporário
+
+    # Baixar o arquivo
+    with open(local_filename, 'wb') as local_file:
+        ftp.retrbinary(f'RETR {filename}', local_file.write)
+    print(f'Arquivo {filename} baixado com sucesso.')
+
+    # Mover o arquivo no servidor FTP
+    ftp.rename(filename, f'{dest_dir}/{filename}')
+    print(f'Arquivo {filename} movido para {dest_dir}/{filename}.')
+
+    # Opcional: deletar o arquivo local após processar
+    import os
+    os.remove(local_filename)
+    print(f'Arquivo local {local_filename} deletado.')
+
+# Encerrar a conexão
+ftp.quit()
+
+
 
 #ArquivoDOS = 'C:\Mais Próxima\Itau400Retorno\cob_341_400_260145_240405_00000.ret'
 #ArquivoDOS = 'C:\Mais Próxima\Itau400Retorno\cob_341_400_260145_240416_00000.ret'
